@@ -1,0 +1,43 @@
+{
+    "name": "five-agency-ag/craft-prometheus-exporter",
+    "description": "A prometheus exporter for CraftCMS",
+    "type": "craft-plugin",
+    "license": "proprietary",
+    "support": {
+        "email": "support@five-agency.ch"
+    },
+    "require": {
+        "php": ">=8.2",
+        "craftcms/cms": "^5.10.0"
+    },
+    "require-dev": {
+        "craftcms/ecs": "dev-main",
+        "craftcms/phpstan": "dev-main"
+    },
+    "autoload": {
+        "psr-4": {
+            "fiveagencyag\\craftprometheusexporter\\": "src/"
+        }
+    },
+    "extra": {
+        "handle": "prometheus-exporter",
+        "name": "Prometheus Exporter",
+        "developer": "FIVE Agency AG",
+        "documentationUrl": ""
+    },
+    "scripts": {
+        "check-cs": "ecs check --ansi",
+        "fix-cs": "ecs check --ansi --fix",
+        "phpstan": "phpstan --memory-limit=1G"
+    },
+    "config": {
+        "sort-packages": true,
+        "platform": {
+            "php": "8.2"
+        },
+        "allow-plugins": {
+            "yiisoft/yii2-composer": true,
+            "craftcms/plugin-installer": true
+        }
+    }
+}
