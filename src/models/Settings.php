@@ -1,6 +1,6 @@
 <?php
 
-namespace fiveagencyag\craftprometheusexporter\models;
+namespace fiveagency\craftprometheusexporter\models;
 
 use Craft;
 use craft\base\Model;

@@ -1,12 +1,15 @@
 <?php
 
-namespace fiveagencyag\craftprometheusexporter;
+namespace fiveagency\craftprometheusexporter;
 
 use Craft;
 use craft\base\Event;
 use craft\base\Model;
 use craft\base\Plugin as BasePlugin;
-use fiveagencyag\craftprometheusexporter\models\Settings;
+use craft\events\RegisterUrlRulesEvent;
+use craft\web\UrlManager;
+use fiveagency\craftprometheusexporter\models\Settings;
+use fiveagency\craftprometheusexporter\services\MetricsService;
 
 /**
  * Prometheus Exporter plugin
@@ -16,6 +19,8 @@ use fiveagencyag\craftprometheusexporter\models\Settings;
  * @author FIVE Agency AG <support@five-agency.ch>
  * @copyright FIVE Agency AG
  * @license https://craftcms.github.io/license/ Craft License
+ * @property-read Metrics $metrics
+ * @property-read MetricsService $metricsService
  */
 class Plugin extends BasePlugin
 {
@@ -25,9 +30,7 @@ class Plugin extends BasePlugin
     public static function config(): array
     {
         return [
-            'components' => [
-                // Define component configs here...
-            ],
+            'components' => ['metricsService' => MetricsService::class],
         ];
     }
 
@@ -63,7 +66,7 @@ class Plugin extends BasePlugin
             UrlManager::class,
             UrlManager::EVENT_REGISTER_SITE_URL_RULES,
             function(RegisterUrlRulesEvent $event) {
-                $event->rules["/metrics"] = "_samhealth/payments/get-payment-gateways";
+                $event->rules["/metrics"] = "prometheus-exporter/metrics/index";
             }
         );
     }

@@ -1,5 +1,5 @@
 {
-    "name": "five-agency-ag/craft-prometheus-exporter",
+    "name": "five-agency/craft-prometheus-exporter",
     "description": "A prometheus exporter for CraftCMS",
     "type": "craft-plugin",
     "license": "proprietary",
@@ -16,7 +16,7 @@
     },
     "autoload": {
         "psr-4": {
-            "fiveagencyag\\craftprometheusexporter\\": "src/"
+            "fiveagency\\craftprometheusexporter\\": "src/"
         }
     },
     "extra": {
