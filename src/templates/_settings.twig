@@ -3,4 +3,44 @@
 
 {% import '_includes/forms.twig' as forms %}
 
-{# ... #}
+{{ forms.autosuggestField({
+    label: 'Metrics Path'|t('prometheus-exporter'),
+    instructions: "Path where the metrics will be exposed"|t('prometheus-exporter'),
+    name: 'metricsPath',
+    value: settings.metricsPath,
+    suggestEnvVars: true,
+    errors: settings.getErrors('metricsPath'),
+    required: true
+}) }}
+
+{{ forms.booleanMenuField({
+    label: 'Enable Basic Authentication',
+    name: 'basicAuthEnabled',
+    value: settings.basicAuthEnabled,
+    errors: settings.getErrors('basicAuthEnabled'),
+    includeEnvVars: true,
+    id: 'basic-auth-settings-switch',
+    toggle: true,
+}) }}
+
+<div id="basic-auth-settings-element" {{not settings.basicAuthEnabled ? 'hidden' }}>
+    {{ forms.autosuggestField({
+        label: 'Basic Auth Username'|t('prometheus-exporter'),
+        instructions: "Username for HTTP Basic Authentication"|t('prometheus-exporter'),
+        name: 'basicAuthUsername',
+        value: settings.basicAuthUsername,
+        suggestEnvVars: true,
+        errors: settings.getErrors('basicAuthUsername'),
+        required: true
+    }) }}
+
+    {{ forms.autosuggestField({
+        label: 'Basic Auth Password'|t('prometheus-exporter'),
+        instructions: "Plain text password for HTTP Basic Authenication"|t('prometheus-exporter'),
+        name: 'basicAuthPassword',
+        value: settings.basicAuthPassword,
+        suggestEnvVars: true,
+        errors: settings.getErrors('basicAuthPassword'),
+        required: true
+    }) }}
+</div>

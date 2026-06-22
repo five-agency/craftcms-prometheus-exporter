@@ -6,6 +6,7 @@ use Craft;
 use craft\web\Controller;
 use yii\web\Response;
 use fiveagency\craftprometheusexporter\services\MetricsService;
+use fiveagency\craftprometheusexporter\services\BasicAuthService;
 
 /**
  * Metrics controller
@@ -20,6 +21,10 @@ class MetricsController extends Controller
      */
     public function actionIndex(): Response
     {
+
+        $basicAuthService = new BasicAuthService();
+        $basicAuthService->authenticate($this->request->getHeaders()->get('Authorization'));
+
         $metricsService = new MetricsService();
         $metrics = $metricsService->generateMetrics();
 
