@@ -3,6 +3,7 @@
 namespace fiveagency\craftprometheusexporter\models;
 
 use Craft;
+use SpomkyLabs\Pki\X501\ASN1\AttributeType;
 use craft\base\Model;
 use craft\behaviors\EnvAttributeParserBehavior;
 use craft\helpers\App;
@@ -32,11 +33,18 @@ class Settings extends Model
     }
 
     public function defineRules(): array {
-        return [
-            [['metricsPath'], 'required'],
-            [['basicAuthUsername'], 'required'],
-            [['basicAuthPassword'], 'required'],
-        ];
+        $rules = [];
+        $rules[] = [['metricsPath'], 'required'];
+
+        if ($this->basicAuthEnabled)
+        {
+            $rules[] = [['basicAuthUsername'], 'required'];
+            $rules[] = [['basicAuthPassword'], 'required'];
+        }
+
+        ray($rules);
+
+        return $rules;
     }
 
     public function getMetricsPath(): string {
