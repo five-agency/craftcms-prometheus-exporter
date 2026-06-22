@@ -1,6 +1,14 @@
 # Prometheus Exporter
 
-A prometheus exporter for CraftCMS
+This plugin integrates **Prometheus** monitoring capabilities with your Craft CMS installation. It exposes health and performance metrics to Prometheus, enabling easy integration into existing monitoring setups.
+
+## Features
+
+- **Metrics Exposure**: Exposes key system metrics.
+- **Customizable Endpoints**: Configurable endpoint path for `/metrics` (default `/metrics`).
+- **Basic HTTP Auth**: Supports HTTP Basic Authentication.
+- **Scalability**: Designed to work with high-traffic sites without significant overhead.
+- **CraftCommerce Suppport**: Exports key metrics from CraftCommerce such as revenue, number of baskets (planned).
 
 ## Requirements
 
