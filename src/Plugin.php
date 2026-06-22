@@ -7,7 +7,6 @@ use craft\base\Event;
 use craft\base\Model;
 use craft\base\Plugin as BasePlugin;
 use craft\events\RegisterUrlRulesEvent;
-use craft\helpers\App;
 use craft\web\UrlManager;
 use fiveagency\craftprometheusexporter\models\Settings;
 use fiveagency\craftprometheusexporter\services\BasicAuthService;
@@ -69,7 +68,7 @@ class Plugin extends BasePlugin
             UrlManager::class,
             UrlManager::EVENT_REGISTER_SITE_URL_RULES,
             function(RegisterUrlRulesEvent $event) {
-                $event->rules[App::parseEnv($this->getSettings()->metricsPath)] = "prometheus-exporter/metrics/index";
+                $event->rules[$this->getSettings()->getMetricsPath()] = "prometheus-exporter/metrics/index";
             }
         );
     }
