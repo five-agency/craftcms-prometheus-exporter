@@ -109,7 +109,7 @@ class MetricsService extends Component
 
         # Asset stats
         $assetsTotalActive = $this->generateStats('num_assets', ['status' => 'enabled'], Asset::find()->count(), 'Total number of assets', self::COUNTER);
-        $assetsTotalActiveSize = $this->generateStats('bytes_assets', ['status' => 'enabled'], Asset::find()->all()->select('size')->scalar(), 'Total bytes of all assets', self::COUNTER);
+        $assetsTotalActiveSize = $this->generateStats('bytes_assets', ['status' => 'enabled'], Asset::find()->limit(null)->sum('size'), 'Total bytes of all assets', self::COUNTER);
 
         # Deprecation stats
         $deprecationsTotal = $this->generateStats('num_deprecations', [], Craft::$app->getDeprecator()->getTotalLogs(), 'Number of deprecation warnings', self::COUNTER);
