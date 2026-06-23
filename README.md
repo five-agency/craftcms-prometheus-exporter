@@ -36,3 +36,34 @@ composer require five-agency-ag/craft-prometheus-exporter
 # tell Craft to install the plugin
 ./craft plugin/install prometheus-exporter
 ```
+
+## Usage
+
+### Custom endpoint
+
+If you need to expose your metrics somewhere else than under `/metrics`. Change the metrics path to your desired path in the plugin settings. Don't forget to update your scrape config if you change this.
+
+### HTTP Basic Auth
+
+In your plugin settings enable Basic Authentication and set a user and password. Don't forget to update your scrape config if you change this.
+
+### Scrape config
+
+To enable Prometheus to scrape metrics from your Craft CMS site, you need to add a scrape configuration to your Prometheus server. Here’s an example of how you might configure it:
+
+```yaml
+- job_name: craftcms
+  scrape_interval: 10s
+  static_configs:
+      - targets:
+            - "mysite.com"
+        labels:
+            custom: "my-custom-label"
+  basic_auth:
+      username: "user"
+      password: "password"
+```
+
+### Grafana Dashboard
+
+Import `grafana-dashboard.json` from the plugins root to your grafana Instance to get a starting point for your custom dashboard.
