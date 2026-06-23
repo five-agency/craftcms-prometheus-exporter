@@ -3,7 +3,7 @@
     "description": "A prometheus exporter for CraftCMS",
     "type": "craft-plugin",
     "license": "proprietary",
-    "version": "v1.0.0",
+    "version": "v1.0.1",
     "support": {
         "email": "support@five-agency.ch"
     },
