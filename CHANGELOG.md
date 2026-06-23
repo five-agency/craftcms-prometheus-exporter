@@ -7,3 +7,10 @@
 ## 1.0.1 - 2026-06-23
 
 - Remove call to ray()
+-
+
+## 1.0.2 - 2026-06-23
+
+- Added dashboard for grafana
+- Improved Documentation
+- Fixed error when calculating total asset size
