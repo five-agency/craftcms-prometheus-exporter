@@ -18,3 +18,7 @@
 ## 1.0.3 - 2026-06-23
 
 - Fixed error when calculating total asset size
+
+## 1.1.0 - 2026-06-23
+
+- Basic support for CraftCommerce exposing orders with status and totals paid and unpaid

@@ -8,7 +8,7 @@ This plugin integrates **Prometheus** monitoring capabilities with your Craft CM
 - **Customizable Endpoints**: Configurable endpoint path for `/metrics` (default `/metrics`).
 - **Basic HTTP Auth**: Supports HTTP Basic Authentication.
 - **Scalability**: Designed to work with high-traffic sites without significant overhead.
-- **CraftCommerce Suppport**: Exports key metrics from CraftCommerce such as revenue, number of baskets (planned).
+- **CraftCommerce Suppport**: Exports key metrics from CraftCommerce such as revenue, orders by status.
 
 ## Requirements
 
