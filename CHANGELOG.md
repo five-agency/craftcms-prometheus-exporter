@@ -14,3 +14,7 @@
 - Added dashboard for grafana
 - Improved Documentation
 - Fixed error when calculating total asset size
+
+## 1.0.3 - 2026-06-23
+
+- Fixed error when calculating total asset size
