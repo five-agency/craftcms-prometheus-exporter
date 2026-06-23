@@ -42,8 +42,6 @@ class Settings extends Model
             $rules[] = [['basicAuthPassword'], 'required'];
         }
 
-        ray($rules);
-
         return $rules;
     }
 
