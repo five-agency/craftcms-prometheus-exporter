@@ -3,6 +3,9 @@
 namespace fiveagency\craftprometheusexporter\services;
 
 use Craft;
+use craft\commerce\elements\Order;
+use craft\commerce\elements\Product;
+use craft\commerce\services\OrderStatuses;
 use craft\elements\Asset;
 use craft\elements\Entry;
 use craft\elements\User;
@@ -10,6 +13,7 @@ use craft\helpers\App;
 use craft\services\Plugins;
 use craft\services\Updates;
 use yii\base\Component;
+
 /**
  * Metrics Service service
  */
@@ -21,11 +25,12 @@ class MetricsService extends Component
     private const SUMMARY = 'summary';
     private const PREFIX = 'craftcms_';
 
-    private function generateLabels(array $labels): string {
+    private function generateLabels(array $labels): string
+    {
         $delimiter = ',';
 
         $labelsDefault = [
-            "base_url" => Craft::$app->sites->primarySite->baseUrl
+            "base_url" => Craft::$app->sites->primarySite->baseUrl,
         ];
 
         $labelsMerged = $labelsDefault + $labels;
@@ -39,25 +44,28 @@ class MetricsService extends Component
         return implode($delimiter, $labelsFormatted);
     }
 
-    private function generateStats(string $key, array $labels, int $value, string|null $help, string|null $type): string {
+    private function generateStats(string $key, array $labels, int $value, string|null $help, string|null $type): string
+    {
         $help = $help ? '#HELP ' . self::PREFIX . $key . ' ' . $help . PHP_EOL : '';
         $type = $type ? '#TYPE ' . self::PREFIX . $key . ' ' . $type . PHP_EOL : '';
         $stat = self::PREFIX . "{$key}{{$this->generateLabels($labels)}} {$value}";
 
-        return $help . $type .$stat;
+        return $help . $type . $stat;
     }
 
-    private function generateDocument(array $stats): string {
+    private function generateDocument(array $stats): string
+    {
         $document = '';
 
-        foreach($stats as $stat) {
+        foreach ($stats as $stat) {
             $document .= $stat . PHP_EOL;
         }
 
         return $document;
     }
 
-    public function generateMetrics (): string {
+    private function generateBasicsStats(): array
+    {
         $info = $this->generateStats('info',
         [
             "cms_version" => Craft::$app->version,
@@ -68,7 +76,7 @@ class MetricsService extends Component
             "uname_hostname" => php_uname('n'),
             "uname_release" => php_uname('r'),
             "uname_machine" => php_uname('m'),
-            "php_version" => PHP_VERSION
+            "php_version" => PHP_VERSION,
         ], 1, 'Generic info', self::GAUGE);
 
         # Update stats
@@ -101,15 +109,16 @@ class MetricsService extends Component
         $usersTotalAdmin = $this->generateStats('num_users', ['role' => 'admin'], User::find()->admin()->count(), null, null);
 
         // # Entries stats
-        $entriesTotalLive = $this->generateStats('num_entries', ['status' => 'live'], Entry::find()->status('live')->site('*')->count(), 'Number of entries', self::COUNTER);
-        $entriesTotalDraft = $this->generateStats('num_entries', ['status' => 'draft'], Entry::find()->drafts()->site('*')->count(), null, null);
-        $entriesTotalPending = $this->generateStats('num_entries', ['status' => 'pending'], Entry::find()->status('pending')->site('*')->count(), null, null);
-        $entriesTotalExpired = $this->generateStats('num_entries', ['status' => 'expired'], Entry::find()->status('expired')->site('*')->count(), null, null);
-        $entriesTotalTrashed = $this->generateStats('num_entries', ['status' => 'trashed'], Entry::find()->trashed()->site('*')->count(), null, null);
+        $entriesTotalLive = $this->generateStats('num_entries', ['status' => 'live'], Entry::find()->status('live')->count(), 'Number of entries', self::COUNTER);
+        $entriesTotalDraft = $this->generateStats('num_entries', ['status' => 'draft'], Entry::find()->drafts()->count(), null, null);
+        $entriesTotalPending = $this->generateStats('num_entries', ['status' => 'pending'], Entry::find()->status('pending')->count(), null, null);
+        $entriesTotalExpired = $this->generateStats('num_entries', ['status' => 'expired'], Entry::find()->status('expired')->count(), null, null);
+        $entriesTotalDisabled = $this->generateStats('num_entries', ['status' => 'disabled'], Entry::find()->status('disabled')->count(), null, null);
+        $entriesTotalTrashed = $this->generateStats('num_entries', ['status' => 'trashed'], Entry::find()->trashed()->count(), null, null);
 
         # Asset stats
         $assetsTotalActive = $this->generateStats('num_assets', ['status' => 'enabled'], Asset::find()->count(), 'Total number of assets', self::COUNTER);
-        $assetsTotalActiveSize = $this->generateStats('bytes_assets', ['status' => 'enabled'], Asset::find()->limit(null)->sum('size'), 'Total bytes of all assets', self::COUNTER);
+        $assetsTotalActiveSize = $this->generateStats('bytes_assets', ['status' => 'enabled'], Asset::find()->limit(null)->sum('size') ?? 0, 'Total bytes of all assets', self::COUNTER);
 
         # Deprecation stats
         $deprecationsTotal = $this->generateStats('num_deprecations', [], Craft::$app->getDeprecator()->getTotalLogs(), 'Number of deprecation warnings', self::COUNTER);
@@ -119,7 +128,7 @@ class MetricsService extends Component
 
         $pluginsTotal = $this->generateStats('num_plugins', [], count($pluginService->getAllPlugins()), 'Number of plugins', self::COUNTER);
 
-        $basicStats = [
+        return [
             $info,
             $updatesAvailable,
             $updatesAvailableCritical,
@@ -141,28 +150,65 @@ class MetricsService extends Component
             $entriesTotalDraft,
             $entriesTotalPending,
             $entriesTotalExpired,
+            $entriesTotalDisabled,
             $entriesTotalTrashed,
             $assetsTotalActive,
             $assetsTotalActiveSize,
             $deprecationsTotal,
-            $pluginsTotal
+            $pluginsTotal,
         ];
+    }
 
-        #CraftCommerce stats
-        $commerceStats = [];
+    private function generateCommerceStats(): array
+    {
+        $pluginService = new Plugins();
         $commerceInstalled = $pluginService->getPlugin('commerce');
 
-        if ($commerceInstalled) {
-            #add all metrics regarding craft commerce
-            # including
-            # Order Number by status
-            # Active and inactive carts
-            # Total revenue
-            # revenue by gateway
-            # total donations
-            # total revenue by subscriptions
+        if (!$commerceInstalled) {
+            return [];
         }
 
-        return $this->generateDocument($basicStats + $commerceStats);
+        #Product stats
+        $productsTotalLive = $this->generateStats('num_products', ['status' => 'live'], Product::find()->count(), 'Number of products', self::COUNTER);
+        $productsTotalDraft = $this->generateStats('num_products', ['status' => 'draft'], Product::find()->drafts()->count(), null, null);
+        $productsTotalPending = $this->generateStats('num_products', ['status' => 'pending'], Product::find()->status('pending')->count(), null, null);
+        $productsTotalPending = $this->generateStats('num_products', ['status' => 'expired'], Product::find()->status('expired')->count(), null, null);
+        $productsTotalTrashed = $this->generateStats('num_products', ['status' => 'trashed'], Product::find()->trashed()->count(), null, null);
+
+        #Order Stats
+        $orderStatusesServices = new OrderStatuses();
+        $orderStatuses = $orderStatusesServices->getAllOrderStatuses();
+        $orderStatusesStats = [];
+
+        $orderStatusesStats[] = $this->generateStats('num_orders', ['status' => 'cart'], Order::find()->isCompleted(false)->count(), 'number of orders', SELF::COUNTER);
+
+        foreach ($orderStatuses as $status) {
+            $orderStatusesStats[] = $this->generateStats('num_orders', ['status' => $status->handle], Order::find()->orderStatus($status->handle)->count(), null, null);
+        }
+
+        $orderTotalsPaid = $this->generateStats('order_totals', ['status' => 'paid'], Order::find()->limit(null)->isPaid()->sum('total') ?? 0, 'total revenue', SELF::COUNTER);
+        $orderTotalsUnpaid = $this->generateStats('order_totals', ['status' => 'unpaid'], Order::find()->limit(null)->isUnpaid()->sum('total') ?? 0, null, null);
+
+        return [
+            $productsTotalLive,
+            $productsTotalDraft,
+            $productsTotalPending,
+            $productsTotalPending,
+            $productsTotalTrashed,
+            ...$orderStatusesStats,
+            $orderTotalsPaid,
+            $orderTotalsUnpaid,
+        ];
+    }
+
+    public function generateMetrics(): string
+    {
+        $basicStats = $this->generateBasicsStats();
+        $commerceStats = $this->generateCommerceStats();
+
+        return $this->generateDocument([
+            ...$basicStats,
+            ...$commerceStats,
+        ]);
     }
 }

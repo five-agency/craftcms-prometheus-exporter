@@ -2,9 +2,8 @@
 
 namespace fiveagency\craftprometheusexporter\services;
 
-use Craft;
+use fiveagency\craftprometheusexporter\Plugin;
 use yii\base\Component;
-use \fiveagency\craftprometheusexporter\Plugin;
 use yii\web\BadRequestHttpException;
 use yii\web\ForbiddenHttpException;
 use yii\web\UnauthorizedHttpException;
@@ -14,13 +13,13 @@ use yii\web\UnauthorizedHttpException;
  */
 class BasicAuthService extends Component
 {
-    public function authenticate (string|null $authorization): void {
+    public function authenticate(string|null $authorization): void
+    {
         $basicAuthEnabled = Plugin::getInstance()->settings->getBasicAuthEnabled();
         $basicAuthUser = Plugin::getInstance()->settings->getBasicAuthUsername();
         $basicAuthPassword = Plugin::getInstance()->settings->getBasicAuthPassword();
 
-        if (!$basicAuthEnabled)
-        {
+        if (!$basicAuthEnabled) {
             return;
         }
 

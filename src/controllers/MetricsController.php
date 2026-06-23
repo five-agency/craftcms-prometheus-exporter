@@ -4,9 +4,9 @@ namespace fiveagency\craftprometheusexporter\controllers;
 
 use Craft;
 use craft\web\Controller;
-use yii\web\Response;
-use fiveagency\craftprometheusexporter\services\MetricsService;
 use fiveagency\craftprometheusexporter\services\BasicAuthService;
+use fiveagency\craftprometheusexporter\services\MetricsService;
+use yii\web\Response;
 
 /**
  * Metrics controller
@@ -21,7 +21,6 @@ class MetricsController extends Controller
      */
     public function actionIndex(): Response
     {
-
         $basicAuthService = new BasicAuthService();
         $basicAuthService->authenticate($this->request->getHeaders()->get('Authorization'));
 
